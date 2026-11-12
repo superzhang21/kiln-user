@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 48" width="148" height="48" role="img" aria-label="Kiln">
+  <title>Kiln lockup</title>
+  <g transform="translate(0 2)">
+    <path d="M6 44V22a18 18 0 0 1 36 0v22z" fill="#B4441F"/>
+    <path d="M17.5 44V35.5a6.5 6.5 0 0 1 13 0V44z" fill="#F7E3D9"/>
+  </g>
+  <text x="60" y="35" fill="#12161A" font-family="ui-sans-serif, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="30" font-weight="600" letter-spacing="-1">kiln</text>
+</svg>

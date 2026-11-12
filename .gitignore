@@ -1,0 +1,11 @@
+node_modules/
+.kiln/
+one/.mcp.json
+dist/
+*.log
+*.tmp
+*.bak
+*.tsbuildinfo
+coverage/
+.DS_Store
+.codebuddy/

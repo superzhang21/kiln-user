@@ -1,0 +1,56 @@
+{
+  "$schema": "../../docs/schema/cast-1.json",
+  "id": "ledger",
+  "version": "0.1.0",
+  "title": "事件账本摘要",
+  "summary": "把大体积事件日志压成一份小摘要，避免把原文塞进上下文",
+  "intents": ["日志", "摘要", "事件统计", "上下文压缩"],
+  "shape": "task",
+  "verbs": ["describe", "invoke"],
+  "entry": {
+    "kind": "local",
+    "module": "./src/pact.ts"
+  },
+  "tools": [
+    {
+      "name": "seed",
+      "purpose": "生成一份示例事件日志，用于验证后续摘要",
+      "args": { "rows": "number?" },
+      "returns": "{ rows, bytes }",
+      "examples": [{ "call": { "rows": 800 }, "result": { "rows": 800, "bytes": 41233 } }]
+    },
+    {
+      "name": "digest",
+      "purpose": "按 kind 汇总事件，并给出压缩比",
+      "args": { "file": "string?", "top": "number?" },
+      "returns": "{ rows, bytes, byKind, summaryBytes, ratio }",
+      "examples": [
+        {
+          "call": { "file": "events.ndjson", "top": 3 },
+          "result": {
+            "rows": 800,
+            "bytes": 41233,
+            "byKind": [
+              { "kind": "click", "count": 512 },
+              { "kind": "view", "count": 231 }
+            ],
+            "summaryBytes": 96,
+            "ratio": 0.0023
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [],
+  "grants": {
+    "file": {
+      "read": ["{castdata}"],
+      "write": ["{castdata}"]
+    }
+  },
+  "budget": {
+    "observeBytes": 2048,
+    "tools": 6,
+    "actions": 4
+  }
+}

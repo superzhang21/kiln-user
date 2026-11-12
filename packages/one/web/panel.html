@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kiln One · 连接状态</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1d2321;
+        --muted: #5f6d68;
+        --line: #dfe5e1;
+        --bg: #f6f7f5;
+        --card: #fff;
+        --ok: #2f6f5e;
+        --warn: #b4441f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 32px;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          15px/1.6 -apple-system,
+          "Segoe UI",
+          "Microsoft YaHei",
+          sans-serif;
+      }
+      main {
+        max-width: 820px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: var(--muted);
+        margin: 0 0 24px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        background: #e8efe9;
+        color: var(--ok);
+      }
+      .badge.off {
+        background: #f7e9e3;
+        color: var(--warn);
+      }
+      h2 {
+        font-size: 15px;
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+      li {
+        margin: 4px 0;
+      }
+      button {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+        border-radius: 8px;
+        padding: 8px 14px;
+        cursor: pointer;
+        font: inherit;
+      }
+      button:hover {
+        border-color: var(--ok);
+      }
+      button.danger {
+        color: var(--warn);
+      }
+      code {
+        background: #eef1ee;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      .log {
+        white-space: pre-wrap;
+        font:
+          13px/1.5 ui-monospace,
+          Consolas,
+          monospace;
+        color: var(--muted);
+        margin-top: 12px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Kiln One · 连接状态</h1>
+      <p class="sub">本机面板 · 数据只保存在这台设备</p>
+
+      <section class="card">
+        <div class="row">
+          <span id="stateBadge" class="badge off">读取中…</span>
+          <span id="stateText" class="muted"></span>
+        </div>
+        <div class="row" style="margin-top: 16px">
+          <button id="refresh">刷新状态</button>
+          <button id="check">重新自检</button>
+          <button id="reconnect">重连</button>
+          <button id="disconnect" class="danger">断开连接</button>
+        </div>
+        <div id="log" class="log"></div>
+      </section>
+
+      <section class="card">
+        <h2>授权范围</h2>
+        <ul id="permissions">
+          <li class="muted">读取中…</li>
+        </ul>
+        <div class="row" style="margin-top: 14px">
+          <button id="grant">重新授权</button>
+          <button id="revoke" class="danger">撤销授权</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>已连接的 agent 客户端</h2>
+        <ul id="connections">
+          <li class="muted">读取中…</li>
+        </ul>
+        <p class="muted" id="portable"></p>
+      </section>
+
+      <section class="card">
+        <h2>最近一次自检</h2>
+        <div id="handshake" class="muted">读取中…</div>
+      </section>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const log = (text) => {
+        $("log").textContent = text;
+      };
+      const api = async (url, body) => {
+        const res = await fetch(
+          url,
+          body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {},
+        );
+        const payload = await res.json();
+        if (!res.ok || payload.ok === false) {
+          const issues = payload.issues || [{ message: "请求失败" }];
+          throw new Error(issues.map((i) => `${i.code || ""} ${i.message} ${i.hint || ""}`.trim()).join("\n"));
+        }
+        return payload;
+      };
+      const render = (s) => {
+        $("stateBadge").textContent = s.connected ? "已连接" : "未连接";
+        $("stateBadge").className = s.connected ? "badge" : "badge off";
+        $("stateText").textContent = s.human;
+        $("permissions").innerHTML = s.permissionLines.map((line) => `<li>${line}</li>`).join("") || "<li>无</li>";
+        $("connections").innerHTML = s.connections.length
+          ? s.connections
+              .map((c) => `<li>${c.client} · <code>${c.configPath}</code>${c.removedAt ? "（已断开）" : ""}</li>`)
+              .join("")
+          : "<li class='muted'>尚无自动注册的客户端</li>";
+        $("portable").textContent = `可导入配置：${s.manualConfig}`;
+        const h = s.lastCheck;
+        $("handshake").textContent = h
+          ? `${h.ok ? "通过" : "失败"} · ${h.at} · 工具 ${h.tools ?? 0} 个 · ${h.ms}ms${h.error ? ` · ${h.error}` : ""}`
+          : "尚未自检";
+      };
+      const refresh = async () => {
+        try {
+          render(await api("/api/status"));
+          log("");
+        } catch (error) {
+          log(String(error.message || error));
+        }
+      };
+      const act = (fn) => async () => {
+        log("处理中…");
+        try {
+          const result = await fn();
+          log(result.human || "完成");
+          await refresh();
+        } catch (error) {
+          log(String(error.message || error));
+        }
+      };
+      $("refresh").onclick = refresh;
+      $("check").onclick = act(async () => {
+        const r = await api("/api/handshake", {});
+        return {
+          human: r.handshake.ok
+            ? `自检通过：${r.handshake.tools} 个工具，${r.handshake.ms}ms`
+            : `自检失败：${r.handshake.error}`,
+        };
+      });
+      $("reconnect").onclick = act(async () => await api("/api/connections", { action: "reconnect" }));
+      $("disconnect").onclick = act(async () => await api("/api/connections", { action: "disconnect" }));
+      $("grant").onclick = act(async () => await api("/api/permissions", { action: "grant" }));
+      $("revoke").onclick = act(async () => await api("/api/permissions", { action: "revoke" }));
+      refresh();
+    </script>
+  </body>
+</html>

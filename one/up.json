@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "kiln-one",
+  "version": "0.1.0",
+  "title": "Kiln One 随手收",
+  "appsDir": "apps",
+  "dataDir": ".kiln/data",
+  "policy": "strict",
+  "clients": "auto",
+  "autostart": false,
+  "handshake": {
+    "timeoutMs": 20000,
+    "probeTool": "catchall__invoke__stats",
+    "describeTool": "catchall__describe",
+    "protocolVersion": "2025-11-25"
+  },
+  "permissions": [
+    {
+      "capability": "store",
+      "scope": "仅 .kiln/data/catchall/store.json",
+      "human": "只在本机保存你交给它的内容",
+      "reason": "台账与索引需要持久化，但不跨应用共享"
+    },
+    {
+      "capability": "file",
+      "scope": "仅应用自己的数据目录 {castdata}",
+      "human": "只在自己的数据目录里写导出文件",
+      "reason": "导出 Markdown / JSON 时需要写文件，路径由能力网关限定"
+    },
+    {
+      "capability": "net",
+      "scope": "未申请，宿主默认拒绝",
+      "human": "不联网，不上传任何内容",
+      "reason": "本地优先，默认应用不需要外部服务"
+    },
+    {
+      "capability": "shell",
+      "scope": "未申请，宿主默认拒绝",
+      "human": "不执行任何系统命令",
+      "reason": "默认应用只做本地收纳与检索"
+    }
+  ]
+}

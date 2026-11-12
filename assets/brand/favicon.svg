@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Kiln">
+  <title>Kiln app icon</title>
+  <rect width="48" height="48" rx="11" fill="#12161A"/>
+  <path d="M8 40V23a16 16 0 0 1 32 0v17z" fill="#B4441F"/>
+  <path d="M18.6 40V32a5.4 5.4 0 0 1 10.8 0v8z" fill="#F7E3D9"/>
+</svg>

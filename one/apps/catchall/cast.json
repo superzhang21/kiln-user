@@ -1,0 +1,156 @@
+{
+  "$schema": "../../../docs/schema/cast-1.json",
+  "id": "catchall",
+  "version": "0.1.0",
+  "title": "随手收",
+  "summary": "把散落的截图文字、链接、待办和一句话收进本地台账，随时查、每天问、每周汇总",
+  "intents": ["随手记", "收纳", "待办", "查找", "资料", "日报", "周报", "摘要", "发票", "链接"],
+  "shape": "panel",
+  "verbs": ["describe", "invoke", "observe", "act"],
+  "entry": {
+    "kind": "local",
+    "module": "./src/pact.ts"
+  },
+  "tools": [
+    {
+      "name": "capture",
+      "purpose": "收纳一条信息或待办，自动去重、分类并落本地",
+      "args": { "text": "string", "title": "string?", "kind": "string?", "tags": "string[]?", "due": "string?" },
+      "returns": "{ ok, id, dedup, kind, total, truncated? }",
+      "examples": [
+        {
+          "call": { "text": "明天下午三点把房租发票交给财务" },
+          "result": { "ok": true, "id": "c_9f3a1b2c4d5e", "dedup": false, "kind": "todo", "total": 1 }
+        }
+      ]
+    },
+    {
+      "name": "find",
+      "purpose": "按关键词找记录，只回少量命中，不把整个库塞进上下文",
+      "args": { "query": "string?", "kind": "string?", "limit": "number?", "includeDone": "boolean?" },
+      "returns": "{ ok, query, total, limit, rows }",
+      "examples": [
+        {
+          "call": { "query": "发票", "limit": 3 },
+          "result": {
+            "ok": true,
+            "query": "发票",
+            "total": 1,
+            "limit": 3,
+            "rows": [
+              {
+                "id": "c_9f3a1b2c4d5e",
+                "title": "房租发票",
+                "kind": "todo",
+                "snippet": "明天下午三点把房租发票交给财务"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "digest",
+      "purpose": "生成每日或每周的紧凑摘要",
+      "args": { "period": "string?" },
+      "returns": "{ ok, period, from, added, done, open, byKind, highlights, bytes }",
+      "examples": [
+        {
+          "call": { "period": "week" },
+          "result": {
+            "ok": true,
+            "period": "week",
+            "added": 8,
+            "done": 3,
+            "open": 5,
+            "byKind": { "todo": 4, "link": 2, "bill": 1, "note": 1, "idea": 0 },
+            "highlights": [],
+            "bytes": 214
+          }
+        }
+      ]
+    },
+    {
+      "name": "stats",
+      "purpose": "只读统计，供启动自检与体检使用",
+      "args": {},
+      "returns": "{ ok, total, open, done, pinned, byKind, lastAt, indexBytes, view }",
+      "examples": [
+        {
+          "call": {},
+          "result": {
+            "ok": true,
+            "total": 0,
+            "open": 0,
+            "done": 0,
+            "pinned": 0,
+            "byKind": { "todo": 0, "link": 0, "bill": 0, "note": 0, "idea": 0 },
+            "lastAt": null,
+            "indexBytes": 2,
+            "view": "day"
+          }
+        }
+      ]
+    },
+    {
+      "name": "get",
+      "purpose": "按 id 读取一条完整记录",
+      "args": { "id": "string" },
+      "returns": "{ ok, item } | { ok, reason }",
+      "examples": [
+        {
+          "call": { "id": "c_9f3a1b2c4d5e" },
+          "result": {
+            "ok": true,
+            "item": { "id": "c_9f3a1b2c4d5e", "text": "明天下午三点把房租发票交给财务", "kind": "todo", "done": false }
+          }
+        }
+      ]
+    },
+    {
+      "name": "remove",
+      "purpose": "按 id 删除一条记录",
+      "args": { "id": "string" },
+      "returns": "{ ok, removed, total } | { ok, reason }",
+      "examples": [
+        {
+          "call": { "id": "c_9f3a1b2c4d5e" },
+          "result": { "ok": true, "removed": true, "total": 0 }
+        }
+      ]
+    },
+    {
+      "name": "export_list",
+      "purpose": "把台账导出成本地 Markdown 或 JSON 文件",
+      "args": { "format": "string?", "scope": "string?" },
+      "returns": "{ ok, path, bytes, rows, truncated }",
+      "examples": [
+        {
+          "call": { "format": "md", "scope": "open" },
+          "result": {
+            "ok": true,
+            "path": "{castdata}/exports/catchall-2026-11-12.md",
+            "bytes": 126,
+            "rows": 2,
+            "truncated": false
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    { "name": "set-view", "purpose": "切换观察窗口 day / week / all", "args": ["period"] },
+    { "name": "mark-done", "purpose": "把一条记录标记为完成", "args": ["id"] },
+    { "name": "pin", "purpose": "置顶或取消置顶一条记录", "args": ["id", "on"] },
+    { "name": "clear-done", "purpose": "清理已完成记录，必须显式 confirm", "args": ["confirm"] }
+  ],
+  "grants": {
+    "store": { "scope": "cast" },
+    "file": { "read": ["{castdata}"], "write": ["{castdata}"] }
+  },
+  "budget": {
+    "observeBytes": 2048,
+    "tools": 8,
+    "actions": 4
+  }
+}

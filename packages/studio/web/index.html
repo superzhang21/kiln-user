@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kiln Studio · 契约与运行</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/tokens.css" />
+    <link rel="stylesheet" href="/ui.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M6 44V22a18 18 0 0 1 36 0v22z" fill="#B4441F" />
+            <path d="M17.5 44V35.5a6.5 6.5 0 0 1 13 0V44z" fill="#F7E3D9" />
+          </svg>
+          <span class="brand__name">kiln</span>
+          <span class="brand__div"></span>
+          <span class="brand__sub">工作台</span>
+        </div>
+        <div class="topbar__right">
+          <label class="ctl">
+            <span>策略</span>
+            <select id="policy">
+              <option value="local">本地（local）</option>
+              <option value="relaxed">宽松（relaxed）</option>
+              <option value="strict">严格（strict）</option>
+            </select>
+          </label>
+          <a class="btn btn--ghost btn--sm" href="/design">设计规范</a>
+        </div>
+      </header>
+
+      <div class="body">
+        <aside class="rail">
+          <div class="rail__head">
+            <span class="rail__title">应用列表</span>
+            <span class="rail__count" id="castCount">0</span>
+          </div>
+          <nav class="rail__list" id="castList"></nav>
+          <div class="rail__foot"><code>kiln studio</code></div>
+        </aside>
+
+        <main class="main">
+          <div class="empty" id="empty">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M6 44V22a18 18 0 0 1 36 0v22z" fill="none" stroke="currentColor" stroke-width="2" />
+              <path d="M17.5 44V35.5a6.5 6.5 0 0 1 13 0V44" fill="none" stroke="currentColor" stroke-width="2" />
+            </svg>
+            <span id="emptyText">正在读取 cast 目录…</span>
+          </div>
+
+          <section class="detail" id="detail" hidden>
+            <header class="detail__head">
+              <div class="detail__titleline">
+                <h1 id="castTitle"></h1>
+                <span class="pill" id="castVersion"></span>
+                <span class="pill" id="castShape"></span>
+              </div>
+              <code class="detail__id" id="castId"></code>
+              <p class="detail__summary" id="castSummary"></p>
+              <div class="chips" id="castVerbs"></div>
+            </header>
+
+            <div class="tabs" role="tablist">
+              <button class="tab is-active" data-tab="contract" role="tab">契约</button>
+              <button class="tab" data-tab="run" role="tab">运行</button>
+              <button class="tab" data-tab="grants" role="tab">授权</button>
+              <button class="tab" data-tab="audit" role="tab">审计</button>
+              <button class="tab" data-tab="manifest" role="tab">清单</button>
+            </div>
+
+            <div data-panel="contract">
+              <div class="section" style="margin-top: 0">
+                <div class="section__title">工具</div>
+                <table class="table" id="toolTable">
+                  <thead>
+                    <tr>
+                      <th style="width: 26%">名称</th>
+                      <th style="width: 40%">用途</th>
+                      <th>参数</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <div class="section" id="actionSection">
+                <div class="section__title">动作</div>
+                <div class="stack" id="actionList"></div>
+              </div>
+
+              <div class="section">
+                <div class="section__title">授权</div>
+                <div class="chips" id="grantList"></div>
+              </div>
+
+              <div class="section">
+                <div class="section__title">上下文成本</div>
+                <div class="chips" id="costList"></div>
+              </div>
+            </div>
+
+            <div data-panel="run" hidden>
+              <div class="run">
+                <div class="panel">
+                  <div class="panel__bar"><span>调用</span><code id="runCast"></code></div>
+                  <div class="panel__body">
+                    <label class="field">
+                      <span>动词</span>
+                      <select id="runVerb"></select>
+                    </label>
+                    <label class="field">
+                      <span>名称</span>
+                      <select id="runName"></select>
+                    </label>
+                    <label class="field">
+                      <span>参数（JSON）</span>
+                      <textarea id="runArgs" spellcheck="false">{}</textarea>
+                    </label>
+                    <button class="btn btn--primary" id="runBtn" style="width: 100%">运行</button>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="panel__bar"><span>结果</span><code id="runMeta">—</code></div>
+                  <pre class="output" id="runOutput">等待调用</pre>
+                </div>
+              </div>
+            </div>
+
+            <div data-panel="grants" hidden>
+              <div class="section" style="margin-top: 0">
+                <div class="section__title">权限申请（写回 cast.json）</div>
+                <div class="grants" id="grantsForm"></div>
+                <div class="muted" style="margin: 10px 0">空白表示不申请。保存前会自动校验并备份为 cast.json.bak。</div>
+                <button class="btn btn--primary" id="grantsSave">保存授权</button>
+                <span class="muted" id="grantsStatus" style="margin-left: 10px"></span>
+                <pre class="output" id="grantsPreview" style="margin-top: 14px"></pre>
+              </div>
+            </div>
+
+            <div data-panel="audit" hidden>
+              <div class="section" style="margin-top: 0">
+                <div class="section__title">
+                  最近能力调用
+                  <button class="btn btn--ghost btn--sm" id="auditRefresh">刷新</button>
+                </div>
+                <div id="auditList"></div>
+              </div>
+            </div>
+
+            <div data-panel="manifest" hidden>
+              <pre class="manifest" id="manifestOut"></pre>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <footer class="statusbar">
+        <span><b>kiln</b> 0.1.0</span>
+        <span id="statusCount">—</span>
+        <span style="margin-left: auto">Apache-2.0</span>
+      </footer>
+    </div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

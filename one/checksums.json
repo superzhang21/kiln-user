@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-12T08:44:23.168Z",
+  "algorithm": "sha256",
+  "bundle": "kiln-one@0.1.0",
+  "files": {
+    "AGENT.md": "97112032faf096ed6904e4ee37ddd1aa48fa0402f5f72e5adfdede475b7f5041",
+    "README.md": "a2cc9de4c6f0230161e6341c05d6389351ac60c939c2bcf7bc66ed18ecd16669",
+    "apps/catchall/README.md": "c77f4917c4a2e7f19d691cadabadf84054c1e5ad21fd55e4658d44e300566b51",
+    "apps/catchall/cast.json": "b2cdd6c927133004215f1dbcf618dde8f8cb659021cf5c9aba3c50ea2d4ff2a3",
+    "apps/catchall/src/pact.ts": "d7ee9dccb40d440b56600e5118cd4d8cb1bf8ab783bedd937ac6dc1853b2af6b",
+    "kiln-up.cmd": "d777c9f05f82bf5b51ad88acca10aefa9ed6419f7758fc9b33fa2254dbf8d6ec",
+    "kiln-up.mjs": "4faa5881862ce3efb07f83030b481767907e330b0ee51cee489b65fbba755c7d",
+    "kiln-up.sh": "f70e6c4e7675c49854382d444ea7a846a8ddf17a8617fa4eb4362fe76558a472",
+    "up.json": "71c5a6aaa1f8db8a849629253d9c58b79761be721a2668ece85b553574b8933d"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "../../docs/schema/cast-1.json",
+  "id": "git-lens",
+  "version": "0.1.0",
+  "title": "Git 洞察面板",
+  "summary": "读当前工作区的提交历史，给出热度、作者分布与最近节奏",
+  "intents": ["git", "提交历史", "作者分布", "代码活跃度"],
+  "shape": "panel",
+  "verbs": ["describe", "invoke", "observe", "act"],
+  "entry": {
+    "kind": "local",
+    "module": "./src/pact.ts"
+  },
+  "tools": [
+    {
+      "name": "commit_stats",
+      "purpose": "统计某个时间窗内的提交数与作者数",
+      "args": { "days": "number?" },
+      "returns": "{ commits, authors, top, topCommits }",
+      "examples": [
+        {
+          "call": { "days": 14 },
+          "result": { "commits": 37, "authors": 4, "top": "alice", "topCommits": 21 },
+          "note": "不传 days 时用当前窗口"
+        }
+      ]
+    },
+    {
+      "name": "author_share",
+      "purpose": "按提交数给出作者占比",
+      "args": { "days": "number?" },
+      "returns": "Array<{ author, commits, share }>",
+      "examples": [
+        {
+          "call": { "days": 30 },
+          "result": [
+            { "author": "alice", "commits": 52, "share": 0.61 },
+            { "author": "bob", "commits": 33, "share": 0.39 }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "apply-window",
+      "purpose": "切换统计时间窗，随后状态立即变化",
+      "args": ["days"]
+    },
+    {
+      "name": "reset",
+      "purpose": "恢复默认窗口"
+    }
+  ],
+  "grants": {
+    "shell": { "allow": ["git"] },
+    "store": { "scope": "cast" }
+  },
+  "budget": {
+    "observeBytes": 1024,
+    "tools": 6,
+    "actions": 8
+  }
+}

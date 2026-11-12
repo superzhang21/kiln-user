@@ -1,0 +1,79 @@
+{
+  "name": "kiln",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "个人 AI 工具箱：把日常小应用通过 MCP 接入 agent，并提供普通用户开箱即用的一键包。",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/superzhang21/kiln",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/superzhang21/kiln.git"
+  },
+  "bugs": {
+    "url": "https://github.com/superzhang21/kiln/issues"
+  },
+  "author": "superzhang21",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "kiln": "./packages/surface/src/cli.ts",
+    "kiln-studio": "./packages/studio/src/bin.ts",
+    "kiln-one": "./one/kiln-up.mjs"
+  },
+  "imports": {
+    "#grain": "./packages/grain/src/index.ts",
+    "#pact": "./packages/pact/src/index.ts",
+    "#host": "./packages/host/src/index.ts",
+    "#forge": "./packages/forge/src/index.ts",
+    "#surface": "./packages/surface/src/index.ts",
+    "#studio": "./packages/studio/src/server.ts",
+    "#one": "./packages/one/src/index.ts",
+    "#fusion": "./packages/fusion/src/index.ts",
+    "#fusion/cli": "./packages/fusion/src/cli.ts",
+    "#platform": "./packages/platform/src/index.ts",
+    "#agents": "./packages/agents/src/index.ts",
+    "#agents/http": "./packages/agents/src/http.ts",
+    "#coding-agent": "./packages/coding-agent/src/index.ts"
+  },
+  "scripts": {
+    "check": "node packages/surface/src/cli.ts check examples/git-lens && node packages/surface/src/cli.ts check examples/ledger",
+    "new": "node packages/surface/src/cli.ts new",
+    "doctor": "node packages/surface/src/cli.ts doctor",
+    "agents": "node packages/surface/src/cli.ts agents",
+    "serve": "node packages/surface/src/cli.ts serve",
+    "studio": "node packages/studio/src/bin.ts ."
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-agent-core": "^1.5.2"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-agent-core": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "agent",
+    "personal-ai",
+    "micro-app",
+    "toolbox",
+    "mcp",
+    "tool-calling",
+    "contract",
+    "runtime"
+  ],
+  "files": [
+    "packages",
+    "assets",
+    "docs",
+    "one",
+    "plugins",
+    "examples",
+    "README.md",
+    "CHANGELOG.md",
+    "NOTICE",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md"
+  ]
+}
